@@ -33,9 +33,15 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.4/main/pg_hba.co
 
 #switch user
 USER postgres
+
 RUN    /etc/init.d/postgresql start &&\
     psql --command "CREATE USER rapiddb WITH SUPERUSER PASSWORD 'rapiddb';" &&\
-    createdb -O rapiddb rapiddb
+    createdb -O rapiddb develop &&\
+    psql --command "GRANT ALL PRIVILEGES ON DATABASE develop TO rapiddb;" &&\
+    createdb -O rapiddb production &&\
+    psql --command "GRANT ALL PRIVILEGES ON DATABASE production TO rapiddb;" &&\
+    createdb -O rapiddb testing &&\
+    psql --command "GRANT ALL PRIVILEGES ON DATABASE testing TO rapiddb;"
 
 VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
