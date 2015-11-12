@@ -1,0 +1,2 @@
+# rapiddb
+Default Postgresql Database
