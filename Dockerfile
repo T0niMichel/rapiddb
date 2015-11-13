@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y locales \
     postgresql-9.4 \
     postgresql-client-9.4 \
     postgresql-contrib-9.4 \
+    postgresql-9.4-postgis-2.1
     postgresql-server-dev-9.4 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
@@ -31,19 +32,23 @@ RUN echo "host all  all    0.0.0.0/0  md5" >> /etc/postgresql/9.4/main/pg_hba.co
     mkdir -p /var/run/postgresql &&\
     chown -R postgres /var/run/postgresql
 
+RUN    /etc/init.d/postgresql start
+
 #switch user
-USER postgres
-
-RUN    /etc/init.d/postgresql start &&\
-    psql --command "CREATE USER rapiddb WITH SUPERUSER PASSWORD 'rapiddb';" &&\
-    createdb -O rapiddb develop &&\
-    psql --command "GRANT ALL PRIVILEGES ON DATABASE develop TO rapiddb;" &&\
-    createdb -O rapiddb production &&\
-    psql --command "GRANT ALL PRIVILEGES ON DATABASE production TO rapiddb;" &&\
-    createdb -O rapiddb testing &&\
-    psql --command "GRANT ALL PRIVILEGES ON DATABASE testing TO rapiddb;"
-
-VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+#USER postgres
 
 EXPOSE 5432
-CMD ["/usr/lib/postgresql/9.4/bin/postgres", "-D", "/var/lib/postgresql/9.4/main", "-c", "config_file=/etc/postgresql/9.4/main/postgresql.conf"]
+#
+RUN    psql --command "CREATE USER 'rapiddb' WITH SUPERUSER PASSWORD 'rapiddb';"
+RUN   createdb -O rapiddb develop &&\
+      createdb -O rapiddb production &&\
+      createdb -O rapiddb testing
+
+#RUN    psql --command "GRANT ALL PRIVILEGES ON DATABASE develop TO rapiddb;"
+#RUN    psql --command "GRANT ALL PRIVILEGES ON DATABASE production TO rapiddb;"
+#RUN    psql --command "GRANT ALL PRIVILEGES ON DATABASE testing TO rapiddb;"
+
+#VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
+
+
+#CMD ["/usr/lib/postgresql/9.4/bin/postgres", "-D", "/var/lib/postgresql/9.4/main", "-c", "config_file=/etc/postgresql/9.4/main/postgresql.conf"]
